@@ -2,6 +2,7 @@
 
 import math
 import random
+import time
 
 import pygame
 from pygame import mixer
@@ -29,7 +30,7 @@ enemyX = []
 enemyY = []
 enemyX_change = []
 enemyY_change = []
-num_of_enemies = 5
+num_of_enemies = 20
 
 for i in range(num_of_enemies):
     enemy_img.append(pygame.image.load('enemy.png'))
@@ -43,7 +44,7 @@ bullet_img = pygame.image.load('water.png')
 bulletX = 0
 bulletY = 480
 bulletX_change = 0
-bulletY_change = 5
+bulletY_change = 10
 bullet_state = "ready"
 
 
@@ -94,27 +95,39 @@ def isCollision(enemyX, enemyY, bulletX, bulletY):
 
 
 # Game Loop
+cumbot_i = 0
 running = True
 while running:
 
     screen.fill((255, 204, 204))
 
+    if bullet_state is "ready":
+        cumbot_i = (cumbot_i+1) % len(enemyX)
+        playerX = enemyX[cumbot_i]
+
+        bulletSound = mixer.Sound("Blood-Squirt-A1-www.fesliyanstudios.com.mp3")
+        bulletSound.play()
+
+        bulletX = playerX
+        bulletY = enemyY[cumbot_i]
+        fire_bullet(bulletX, bulletY)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        keys = pygame.key.get_pressed() 
+        if keys[pygame.K_SPACE]:
+            bulletSound = mixer.Sound("Blood-Squirt-A1-www.fesliyanstudios.com.mp3")
+            bulletSound.play()
+
+            bulletX = playerX
+            fire_bullet(bulletX, bulletY)
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                playerX_change = -0.5
+                playerX_change = -5
             if event.key == pygame.K_RIGHT:
-                playerX_change = 0.5
-            if event.key == pygame.K_SPACE:
-                if bullet_state is "ready":
-                    bulletSound = mixer.Sound("Blood-Squirt-A1-www.fesliyanstudios.com.mp3")
-                    bulletSound.play()
-
-                    bulletX = playerX
-                    fire_bullet(bulletX, bulletY)
+                playerX_change = 5
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
@@ -125,7 +138,6 @@ while running:
         playerX = 0
     elif playerX >= 736:
         playerX = 736
-
 
     for i in range(num_of_enemies):
 
@@ -164,7 +176,7 @@ while running:
 
     if bullet_state is "fire":
         fire_bullet(bulletX, bulletY)
-        bulletY -= bulletY_change
+        bulletY -= bulletY_change * 10
 
     player(playerX, playerY)
     show_score(textX, testY)
